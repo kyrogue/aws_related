@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Starts a EC2 instance'
+
+Resources:
+  StartEC2Function:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.startec2
+      Runtime: nodejs6.10
+      MemorySize: 128
+      Timeout: 15
+      CodeUri: ./ # target the current folder, will zip up this folder and upload to S3
+      Tags: 
+        Environment: Development
+      Events:
+        Timer:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 1 ? * MON-FRI *)
