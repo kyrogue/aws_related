@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: "2010-09-09" # CFN version to use ( Optional, will use latest version if not specified)
+Description: "Creates a stack that uses CloudTrail to publish events to SNS which is sent to SQS" # A description to this template ( Optional )
+Parameters:
+  CloudWatchLogGroupARN:
+    Type: String
+    Description: "The Amazon Resource Name (ARN) of a log group to which CloudTrail logs will be delivered."
+  CloudWatchLogRoleARN: 
+    Type: String    
+    Description: "The role ARN that Amazon CloudWatch Logs (CloudWatch Logs) assumes to write logs to a log group."
+  EnableLogFileValidation:
+    Type: String    
+    Description: "Indicates whether CloudTrail validates the integrity of log files."
+    AllowedValues:
+      - true
+      - false
+    Default: true
+  IncludeGlobalServiceEvents: 
+    Type: String    
+    Description: "Indicates whether the trail is publishing events from global services, such as IAM, to the log files."
+    AllowedValues:
+      - true
+      - false
+    Default: false
+  MultiRegionTrail:
+    Type: String
+    Description: "Indicates whether the CloudTrail trail is created in the region in which you create the stack (false) or in all regions (true)."
+    AllowedValues:
+      - true
+      - false
+    Default: true
+  KMSKeyId:
+    Description: "The AWS Key Management Service (AWS KMS) key ID that you want to use to encrypt CloudTrail logs. You can specify an alias name (prefixed with alias/), an alias ARN, a key ARN, or a globally unique identifier."
+    Type: String
+    Default: ""
+  S3BucketName:
+    Description: "The name of the Amazon S3 bucket where CloudTrail publishes log files."
+    Type: String
+    Default: ""
+  S3KeyPrefix:
+    Type: String
+    Description: "An Amazon S3 object key prefix that precedes the name of all log files."
+    Default: ""
+  SNSTopicName:
+    Description: "The name of an Amazon SNS topic that is notified when new log files are published."
+    Type: String
+    Default: ""
+  EnvironmentTagValue:
+    Description: "The value of the environment tag."
+    Type: String
+    AllowedValues:
+      - "dev"
+      - "prod"
+      - "staging"
+  EmailTagValue:
+    Description: "A valid email to use for contacting"
+    Type: String
+    AllowedPattern: "^[\\x20-\\x45]?[\\w-\\+]+(\\.[\\w]+)*@[\\w-]+(\\.[\\w]+)*(\\.[a-z]{2,})$"
+    ConstraintDescription: "must be a valid email address"
+  TrailName:
+    Description: "The name of the trail. For constraint information, see CreateTrail in the AWS CloudTrail API Reference."
+    Type: String
+Resources: # 1 of the 6 Top level object ( Required )
+  TagMonitorCloudTrail: # Name of resource
+    Type: "AWS::CloudTrail::Trail" # The actual AWS service, 'AWS::ProductIdentifier::ResourceType', depending on the resource additional properties may not be needed.
+    Properties:
+      CloudWatchLogsLogGroupArn: !Ref CloudWatchLogGroupARN
+      CloudWatchLogsRoleArn: !Ref CloudWatchLogRoleARN
+      EnableLogFileValidation: !Ref EnableLogFileValidation
+      IncludeGlobalServiceEvents: !Ref IncludeGlobalServiceEvents
+      IsMultiRegionTrail: !Ref MultiRegionTrail
+      KMSKeyId: !Ref KMSKeyId
+      S3BucketName: !Ref S3BucketName
+      S3KeyPrefix: !Ref S3KeyPrefix
+      SnsTopicName: !Ref SNSTopicName
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentTagValue
+        - Key: Email
+          Value: !Ref EmailTagValue
+      TrailName: !Ref TrailName
